@@ -99,6 +99,3 @@ def schedule_job():
 
     # Now send the new listings to notification
     push = pb.push_note("Update: New Stock Listing", json.dumps(new_listing))
-
-
-schedule_job()
