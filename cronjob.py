@@ -8,7 +8,7 @@ from notify_new_listing import schedule_job
 scheduler = BlockingScheduler(timezone="Asia/Kathmandu")
 
 
-scheduler.add_job(schedule_job, "cron", day="*", hour="0", minute=30)
+scheduler.add_job(schedule_job, "cron", day="*", hour="7", minute=30)
 # scheduler.add_job(schedule_job, "interval", seconds=120)
 
 scheduler.start()
