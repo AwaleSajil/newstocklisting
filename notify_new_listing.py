@@ -1,12 +1,10 @@
-from pushbullet import Pushbullet
+
 import requests
 from bs4 import BeautifulSoup
 from os.path import exists
 import json
 from datetime import date
 import nepali_datetime
-
-
 
 
 def find_new_listing(prev_listing, get_from_func, source, listing, new_listing):
@@ -20,7 +18,7 @@ def find_new_listing(prev_listing, get_from_func, source, listing, new_listing):
     return listing, new_listing
 
 
-# neosealpha
+# nepsealpha
 def get_from_nepsealpha():
     r = requests.get('https://nepsealpha.com/trading/1/search')
     if r.status_code == 200:
@@ -28,8 +26,6 @@ def get_from_nepsealpha():
         symbols = set([i.get('symbol', "") for i in s])
         return symbols
     return {}
-
-
 
 
 #nepalstock
@@ -44,8 +40,6 @@ def get_from_nepalstock():
     return {}
 
 
-
-
 # merolagani
 def get_from_merolagani():
     r = requests.get('https://merolagani.com/handlers/AutoSuggestHandler.ashx?type=Company')
@@ -57,14 +51,22 @@ def get_from_merolagani():
     return {}
 
 
+def send_msg_on_telegram(message, telegram_auth_token, telegram_group_id):
+    telegram_api_url = f"https://api.telegram.org/bot{telegram_auth_token}/sendMessage?chat_id=@{telegram_group_id}&text={message}"
+    tel_resp = requests.get(telegram_api_url)
+    if tel_resp.status_code == 200 :
+        print ("INFO : Notification has been sent on Telegram")
+    else :
+        print("ERROR : Could not send Message")
+
+
 def schedule_job():
-    today = date.today()
-    API_KEY = "o.Sb8SWBPWalCnVtRvBPjW2om7kOv9ONok"  # get you token from pushbullet
+    telegram_auth_token = "5338104596:AAFOa77XzlZT4cFOyLVQ6wVe8Drz7UirlCE"
+    telegram_group_id = "nepse_info_group"
+
     previous_listing_file = "prev_list.json"
     listing = {"date": str(nepali_datetime.datetime.now())}  # to save to json file
     new_listing = {"date": str(nepali_datetime.datetime.now())}  # to send to notification
-
-    pb = Pushbullet(API_KEY)
 
     prev_file_exists = exists(previous_listing_file)
     if not prev_file_exists:
@@ -99,4 +101,5 @@ def schedule_job():
     f.close()
 
     # Now send the new listings to notification
-    push = pb.push_note("Update: New Stock Listing", json.dumps(new_listing))
+    msg = "Update: New Stock Listing \n" + json.dumps(new_listing)
+    send_msg_on_telegram(msg, telegram_auth_token, telegram_group_id)
