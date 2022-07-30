@@ -6,6 +6,6 @@ from notify_new_listing import schedule_job
 
 # Create an instance of scheduler and add function.
 scheduler = BlockingScheduler()
-scheduler.add_job(schedule_job, "interval", seconds=30)
+scheduler.add_job(schedule_job, "interval", seconds=60)
 
 scheduler.start()
