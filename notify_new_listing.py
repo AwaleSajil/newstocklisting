@@ -4,7 +4,8 @@ from bs4 import BeautifulSoup
 from os.path import exists
 import json
 from datetime import date
-from datetime import datetime
+import nepali_datetime
+
 
 
 
@@ -60,8 +61,8 @@ def schedule_job():
     today = date.today()
     API_KEY = "o.Sb8SWBPWalCnVtRvBPjW2om7kOv9ONok"  # get you token from pushbullet
     previous_listing_file = "prev_list.json"
-    listing = {"date": str(datetime.now())}  # to save to json file
-    new_listing = {"date": str(datetime.now())}  # to send to notification
+    listing = {"date": str(nepali_datetime.datetime.now())}  # to save to json file
+    new_listing = {"date": str(nepali_datetime.datetime.now())}  # to send to notification
 
     pb = Pushbullet(API_KEY)
 
