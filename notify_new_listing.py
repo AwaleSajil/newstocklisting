@@ -4,15 +4,11 @@ from bs4 import BeautifulSoup
 from os.path import exists
 import json
 from datetime import date
-
-today = date.today()
-API_KEY = "o.Sb8SWBPWalCnVtRvBPjW2om7kOv9ONok" #get you token from pushbullet
-previous_listing_file = "prev_list.json"
-listing = {"date": str(today)} # to save to json file
-new_listing = {"date": str(today)} # to send to notification
+from datetime import datetime
 
 
-def find_new_listing(prev_listing, get_from_func, source):
+
+def find_new_listing(prev_listing, get_from_func, source, listing, new_listing):
     prev_symbols = prev_listing.get(source, {})
     current_list = get_from_func()
     new_list = set(current_list) - set(prev_symbols)
@@ -20,31 +16,7 @@ def find_new_listing(prev_listing, get_from_func, source):
     listing[source] = list(current_list)
     new_listing[source] = list(new_list)
 
-    return 0
-
-
-pb = Pushbullet(API_KEY)
-# push = pb.push_note("This is the title", content)
-
-# Load previous files if any
-prev_file_exists = exists(previous_listing_file)
-if not prev_file_exists:
-    # create new file
-    f = open(previous_listing_file, "a")
-    data = {
-        "date": ""
-    }
-    json_object = json.dumps(data, indent=4)
-    f.write(json_object)
-    f.close()
-
-try:
-    f = open(previous_listing_file, "r")
-    prev_listing = json.load(f)
-except:
-    prev_listing = {}
-
-
+    return listing, new_listing
 
 
 # neosealpha
@@ -83,20 +55,50 @@ def get_from_merolagani():
 
     return {}
 
-try:
-    find_new_listing(prev_listing, get_from_nepsealpha, 'nepsealpha')
-    find_new_listing(prev_listing, get_from_nepalstock, 'nepalstock')
-    find_new_listing(prev_listing, get_from_merolagani, 'merolagani')
-except:
-    print("Some Souurces doesnt work")
 
-## Finally save this to file
-f.close()
-f = open(previous_listing_file, "w")
-json_object = json.dumps(listing, indent=4)
-f.write(json_object)
-f.close()
+def schedule_job():
+    today = date.today()
+    API_KEY = "o.Sb8SWBPWalCnVtRvBPjW2om7kOv9ONok"  # get you token from pushbullet
+    previous_listing_file = "prev_list.json"
+    listing = {"date": str(datetime.now())}  # to save to json file
+    new_listing = {"date": str(datetime.now())}  # to send to notification
+
+    pb = Pushbullet(API_KEY)
+
+    prev_file_exists = exists(previous_listing_file)
+    if not prev_file_exists:
+        # create new file
+        f = open(previous_listing_file, "a")
+        data = {
+            "date": ""
+        }
+        json_object = json.dumps(data, indent=4)
+        f.write(json_object)
+        f.close()
+
+    try:
+        f = open(previous_listing_file, "r")
+        prev_listing = json.load(f)
+    except:
+        prev_listing = {}
+
+    try:
+        find_new_listing(prev_listing, get_from_nepsealpha, 'nepsealpha', listing, new_listing)
+        find_new_listing(prev_listing, get_from_nepalstock, 'nepalstock', listing, new_listing)
+        find_new_listing(prev_listing, get_from_merolagani, 'merolagani', listing, new_listing)
+        print("Sucess")
+    except:
+        print("Some Souurces doesnt work")
+
+    ## Finally save this to file
+    f.close()
+    f = open(previous_listing_file, "w")
+    json_object = json.dumps(listing, indent=4)
+    f.write(json_object)
+    f.close()
+
+    # Now send the new listings to notification
+    push = pb.push_note("Update: New Stock Listing", json.dumps(new_listing))
 
 
-#Now send the new listings to notification
-push = pb.push_note("Update: New Stock Listing", json.dumps(new_listing))
+schedule_job()
