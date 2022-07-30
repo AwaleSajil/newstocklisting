@@ -1,1 +1,1 @@
-<h1>Nepse New stock listing</h1>
+<?php include_once("home.html"); ?>
