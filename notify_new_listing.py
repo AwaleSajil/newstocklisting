@@ -7,6 +7,27 @@ from datetime import date
 import nepali_datetime
 
 
+def get_pantry_json(api_key = "aa3e70ae-0fde-40d1-abb7-cf29b6271491", bucket = "nepse_stock_list"):
+    uri = f"https://getpantry.cloud/apiv1/pantry/{api_key}/basket/{bucket}"
+
+    r = requests.get(uri, headers = {"Content-Type": "application/json"})
+
+    if r.status_code == 200:
+        return json.loads(r.text)
+    else:
+        {"status": r.status_code, "source": "pantry"}
+
+
+def update_pantry_json(data, api_key = "aa3e70ae-0fde-40d1-abb7-cf29b6271491", bucket = "nepse_stock_list"):
+    uri = f"https://getpantry.cloud/apiv1/pantry/{api_key}/basket/{bucket}"
+
+    r = requests.post(uri, headers = {"Content-Type": "application/json"}, data = json.dumps(data))
+
+    if r.status_code == 200:
+        return 0
+    else:
+        return 1
+
 def find_new_listing(prev_listing, get_from_func, source, listing, new_listing):
     prev_symbols = prev_listing.get(source, {})
     current_list = get_from_func()
@@ -68,20 +89,9 @@ def schedule_job():
     listing = {"date": str(nepali_datetime.datetime.now())}  # to save to json file
     new_listing = {"date": str(nepali_datetime.datetime.now())}  # to send to notification
 
-    prev_file_exists = exists(previous_listing_file)
-    if not prev_file_exists:
-        # create new file
-        f = open(previous_listing_file, "a")
-        data = {
-            "date": ""
-        }
-        json_object = json.dumps(data, indent=4)
-        f.write(json_object)
-        f.close()
-
+    #read the json file
     try:
-        f = open(previous_listing_file, "r")
-        prev_listing = json.load(f)
+        prev_listing = get_pantry_json()
     except:
         prev_listing = {}
 
@@ -94,12 +104,27 @@ def schedule_job():
         print("Some Souurces doesnt work")
 
     ## Finally save this to file
-    f.close()
-    f = open(previous_listing_file, "w")
-    json_object = json.dumps(listing, indent=4)
-    f.write(json_object)
-    f.close()
+    try:
+        r = update_pantry_json(listing)
+    except:
+        r = 1
+    if r == 1:
+        print("Couldn't save the bucket")
+
 
     # Now send the new listings to notification
     msg = "Update: New Stock Listing \n" + json.dumps(new_listing)
-    send_msg_on_telegram(msg, telegram_auth_token, telegram_group_id)
+    # send_msg_on_telegram(msg, telegram_auth_token, telegram_group_id)
+
+    num_new_stocks = 0
+    for k,v in new_listing.items():
+        if k == "date":
+            continue
+        num_new_stocks += len(v)
+
+    if num_new_stocks == 0:
+        print(".")
+        send_msg_on_telegram(".", telegram_auth_token, telegram_group_id)
+    else:
+        print(msg)
+        send_msg_on_telegram(msg, telegram_auth_token, telegram_group_id)
