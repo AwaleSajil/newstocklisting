@@ -28,6 +28,7 @@ def update_pantry_json(data, api_key = "aa3e70ae-0fde-40d1-abb7-cf29b6271491", b
     else:
         return 1
 
+
 def find_new_listing(prev_listing, get_from_func, source, listing, new_listing):
     prev_symbols = prev_listing.get(source, {})
     current_list = get_from_func()
@@ -81,7 +82,29 @@ def send_msg_on_telegram(message, telegram_auth_token, telegram_group_id):
         print("ERROR : Could not send Message")
 
 
-def schedule_job():
+def message_formater(new_listing):
+    msg = "Update: New Stock Listing \n"
+
+    n = 1
+
+    for src, v in new_listing.items():
+        if src == "date":
+            continue
+
+        for stock in v:
+            tmp = str(n) + ". " + stock + " - " + src + "\n"
+            n += 1
+            msg += tmp
+    return msg
+
+
+
+
+
+def schedule_job(env="prod"):
+
+    msg_prefix = "------ Testing Purpose Only ------\n" if env != "prod" else ""
+
     telegram_auth_token = "5338104596:AAFOa77XzlZT4cFOyLVQ6wVe8Drz7UirlCE"
     telegram_group_id = "nepse_info_group"
 
@@ -123,8 +146,9 @@ def schedule_job():
         num_new_stocks += len(v)
 
     if num_new_stocks == 0:
-        print(".")
-        send_msg_on_telegram(".", telegram_auth_token, telegram_group_id)
+        print("No New Stock Listing Today")
+        send_msg_on_telegram(msg_prefix + "No New Stock Listing Today", telegram_auth_token, telegram_group_id)
     else:
+        msg = message_formater(new_listing)
         print(msg)
-        send_msg_on_telegram(msg, telegram_auth_token, telegram_group_id)
+        send_msg_on_telegram(msg_prefix + msg, telegram_auth_token, telegram_group_id)
