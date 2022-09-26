@@ -146,8 +146,9 @@ def schedule_job(env="prod"):
         num_new_stocks += len(v)
 
     if num_new_stocks == 0:
-        print("No New Stock Listing Today")
-        send_msg_on_telegram(msg_prefix + "No New Stock Listing Today", telegram_auth_token, telegram_group_id)
+        pass
+        # print("No New Stock Listing Today")
+        # send_msg_on_telegram(msg_prefix + "No New Stock Listing Today", telegram_auth_token, telegram_group_id)
     else:
         msg = message_formater(new_listing)
         print(msg)
