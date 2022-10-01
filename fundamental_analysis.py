@@ -138,7 +138,7 @@ def message_formater(book_value_analysis, cash_dividend_analysis):
     msg += "Top Stocks based on book and market value\n"
     msg += book_value_analysis
     msg += "\n-----------------------------------\n"
-    msg += "Top Stocks based Cash Dividend per Investment\n"
+    msg += "Top Stocks based on Cash Dividend Last year\n"
     msg += cash_dividend_analysis
     msg += "\n-----------------------------------"
 
