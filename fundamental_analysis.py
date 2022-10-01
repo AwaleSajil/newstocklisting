@@ -102,7 +102,7 @@ def best_symbols_based_on_cash(symbol_info, top=10):
                 continue
             cash_per_1000 = (dividend_per_share / market_price) * 1000
             df = df.append(
-                {'Symbols': s, 'Cash per 1000 invested': cash_per_1000,
+                {'Symbols': s, 'Cash /1000 invested': round(cash_per_1000,2),
                  'Market price': market_price,
                  'Last Trade Date': last_date
                  }, ignore_index=True)
@@ -168,3 +168,5 @@ def funda_analysis_job():
 
 
 
+if __name__ == "__main__":
+    funda_analysis_job()
