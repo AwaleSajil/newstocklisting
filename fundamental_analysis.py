@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime
 from datetime import date
 
+
 def tables_to_dict(tables):
     d = {}
 
@@ -91,6 +92,7 @@ def best_symbols_based_on_cash(symbol_info, top=10):
             market_price = float(info.get('Market Price', None).replace(",", ""))
         if info.get('% Dividend', None) is not None:
             dividend_percent = info.get('% Dividend', None).split(" ")[0]
+            dividend_percent = dividend_percent.replace(",", "")
             if dividend_percent == '':
                 continue
             else:
@@ -106,10 +108,10 @@ def best_symbols_based_on_cash(symbol_info, top=10):
                  'Market price': market_price,
                  'Last Trade Date': last_date
                  }, ignore_index=True)
-    df = df.sort_values(by=['Cash per 1000 invested'], ascending=False)
+    df = df.sort_values(by=['Cash /1000 invested'], ascending=False)
     df.set_index('Symbols', inplace=True)
 
-    temp = df.head(top)[['Cash per 1000 invested', 'Market price']]
+    temp = df.head(top)[['Cash /1000 invested', 'Market price']]
 
     return (temp.to_string())
 
