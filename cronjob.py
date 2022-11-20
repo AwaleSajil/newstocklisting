@@ -11,7 +11,7 @@ scheduler2 = BlockingScheduler(timezone="Asia/Kathmandu")
 
 
 # scheduler1.add_job(schedule_job, "cron", day="*", hour="7", minute=30)
-scheduler2.add_job(funda_analysis_job, "cron", day="sun", hour="7", minute=30)
+scheduler2.add_job(funda_analysis_job, "cron", day_of_week="sun", hour="7", minute=30)
 # scheduler.add_job(schedule_job, "interval", seconds=120)
 
 # scheduler1.start()
